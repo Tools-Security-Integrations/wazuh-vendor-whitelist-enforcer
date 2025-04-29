@@ -1,0 +1,12 @@
+<group name="ProcessCreation">
+<rule id="100500" level="12">
+<if_sid>61603</if_sid>
+<list field="win.eventdata.company" lookup="not_match_key">etc/lists/software-vendors</list>
+<description>Sysmon - Event 1: Process $(win.eventdata.description) started but not allowed by the software policy.</description>
+<mitre>
+<id>T1036</id>
+</mitre>
+<options>no_full_log</options>
+<group>sysmon_event1,software_policy</group>
+</rule>
+</group>
