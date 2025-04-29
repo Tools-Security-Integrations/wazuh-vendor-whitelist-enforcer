@@ -11,8 +11,13 @@ A user-facing balloon notification is displayed.
 
 🛠️ Installation & Setup
 1️⃣ Install Sysmon on Windows Agent
-Download Sysmon from Microsoft and deploy it using a preconfigured ruleset.
-📥 Sysinternals PsTools
+Step1: Download and Extract PsTools in Windows agent.
+
+Link for Download - https://learn.microsoft.com/en-us/sysinternals/downloads/pstools
+
+Step 2: Download Powershell 7+ on windows agent side.
+
+
 
 2️⃣ Configure Wazuh Manager Rules
 Enable Sysmon rules:
