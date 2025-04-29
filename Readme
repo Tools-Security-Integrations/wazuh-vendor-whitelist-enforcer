@@ -1,0 +1,106 @@
+🧠 How It Works
+Sysmon logs process creation (event ID 1).
+
+Wazuh custom rule checks the win.eventdata.company field.
+
+If the company is not in the whitelist, an alert is triggered.
+
+Active response runs PsSuspend via PowerShell to suspend or kill the process.
+
+A user-facing balloon notification is displayed.
+
+🛠️ Installation & Setup
+1️⃣ Install Sysmon on Windows Agent
+Download Sysmon from Microsoft and deploy it using a preconfigured ruleset.
+📥 Sysinternals PsTools
+
+2️⃣ Configure Wazuh Manager Rules
+Enable Sysmon rules:
+
+cd /var/ossec/ruleset/rules/
+nano 0595-win-sysmon_rules.xml
+# Change rule level from 0 to 5 to see process creation logs.
+3️⃣ Create Whitelist File
+Create vendor list:
+
+
+sudo nano /var/ossec/etc/lists/software-vendors
+Example content:
+
+
+Microsoft Corporation:
+GitHub, Inc.:
+Brave Software, Inc.:
+Sysinternals:
+Set permissions:
+
+
+chown root:wazuh /var/ossec/etc/lists/software-vendors
+chmod 640 /var/ossec/etc/lists/software-vendors
+4️⃣ Add to Wazuh Configuration
+In ossec.conf under <ruleset> section:
+
+<list>etc/lists/software-vendors</list>
+5️⃣ Import Custom Detection Rule
+Append rules/local_rules.xml into:
+
+/var/ossec/etc/rules/local_rules.xml
+6️⃣ Configure Active Response
+In ossec.conf under <active-response>:
+
+
+<command>
+    <name>pssuspend</name>
+    <executable>pssuspend.cmd</executable>
+    <timeout_allowed>no</timeout_allowed>
+</command>
+
+<active-response>
+    <disabled>no</disabled>
+    <level>12</level>
+    <command>pssuspend</command>
+    <location>local</location>
+    <rules_group>software_policy</rules_group>
+</active-response>
+
+7️⃣ Deploy Scripts on Windows Agent
+Place the following in C:\Program Files (x86)\ossec-agent\active-response\bin\:
+
+pssuspend.cmd
+
+pssuspend.ps1
+
+Ensure PowerShell 7+ is installed to handle JSON parsing correctly.
+
+8️⃣ Verify PsTools Path in Script
+Update the PowerShell script (pssuspend.ps1) to reflect the correct path of:
+
+PsExec64.exe
+
+PsSuspend64.exe
+
+PsKill64.exe
+
+✅ Example Alert
+When a process from an unknown vendor (e.g., hacker.exe) runs, Wazuh logs:
+
+Sysmon - Event 1: Process hacker.exe started but not allowed by the software policy.
+
+The process is suspended and a user notification appears:
+
+Application Suspended
+An application was suspended due to the software policies in place.
+
+⚠️ Caution
+Make sure your software-vendors list is accurate to avoid suspending legitimate software. Test on a non-production environment first.
+
+📌 To-Do / Future Features
+Slack / Email integration for violations
+
+Auto-approve known software hashes or vendors from incident responses
+
+Dashboard view of blocked software
+
+👨‍💻 Author
+Vaibhav Handekar
+Cyber Security Analyst
